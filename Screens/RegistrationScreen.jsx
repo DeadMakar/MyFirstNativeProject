@@ -1,68 +1,122 @@
 import React, { useState } from "react";
-import { Button, StyleSheet, Text, TextInput, View } from "react-native";
-import BG from "../components/BG";
+import {
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  KeyboardAvoidingView,
+  Platform,
+  ImageBackground,
+} from "react-native";
+import CustomButton from "../components/CustomButton";
+import image from "../assets/images/Photo BG.jpg";
 
 const RegistrationScreen = () => {
   const [userName, onChangeUserName] = useState("");
   const [email, onChangeEmail] = useState("");
   const [password, onChangePassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isUsernameFocused, setIsUsernameFocused] = useState(false);
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
   const handleSubmit = () => {
-    // Опрацьовуємо натискання на кнопку тут
     console.log("Button clicked!");
   };
 
   return (
-    <View>
-      <BG />
-      <View style={styles.container}>
-        <Text style={styles.text}>Реєстрація</Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={onChangeUserName}
-          value={userName}
-          placeholder="Логін"
-          keyboardType="default"
-        ></TextInput>
-        <TextInput
-          style={styles.input}
-          onChangeText={onChangeEmail}
-          value={email}
-          placeholder="Адреса електронної пошти"
-          keyboardType="email-address"
-        ></TextInput>
-        <TextInput
-          style={styles.input}
-          onChangeText={onChangePassword}
-          value={password}
-          placeholder="Пароль"
-          keyboardType="default"
-        ></TextInput>
-        <Button
-          title="Зареєструватися"
-          onPress={handleSubmit}
-          style={styles.button}
-          textStyle={styles.buttonText}
-        />
-      </View>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <ImageBackground source={image} resizeMode="cover" style={styles.image}>
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === "ios" ? "padding" : null}
+        >
+          <View style={styles.avatarContainer} />
+          <View style={styles.registrationContainer}>
+            <Text style={styles.text}>Реєстрація</Text>
+            <TextInput
+              style={[styles.input, isUsernameFocused && styles.inputFocused]}
+              onChangeText={onChangeUserName}
+              value={userName}
+              placeholder="Логін"
+              placeholderTextColor="#bdbdbd"
+              keyboardType="default"
+              onFocus={() => setIsUsernameFocused(true)}
+              onBlur={() => setIsUsernameFocused(false)}
+            ></TextInput>
+            <TextInput
+              style={[styles.input, isEmailFocused && styles.inputFocused]}
+              onChangeText={onChangeEmail}
+              value={email}
+              placeholder="Адреса електронної пошти"
+              placeholderTextColor="#bdbdbd"
+              keyboardType="email-address"
+              onFocus={() => setIsEmailFocused(true)}
+              onBlur={() => setIsEmailFocused(false)}
+            ></TextInput>
+            <TextInput
+              style={[styles.input, isPasswordFocused && styles.inputFocused]}
+              onChangeText={onChangePassword}
+              value={password}
+              placeholder="Пароль"
+              placeholderTextColor="#bdbdbd"
+              keyboardType="default"
+              secureTextEntry={!showPassword}
+              onFocus={() => setIsPasswordFocused(true)}
+              onBlur={() => setIsPasswordFocused(false)}
+            ></TextInput>
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              style={styles.showPasswordButton}
+            >
+              <Text style={styles.showPasswordButtonText}>
+                {showPassword ? "Приховати" : "Показати"}
+              </Text>
+            </TouchableOpacity>
+            <CustomButton title="Зареєструватися" onPress={handleSubmit} />
+            <Text style={styles.loginText}>Вже є акаунт? Увійти</Text>
+          </View>
+        </KeyboardAvoidingView>
+      </ImageBackground>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  image: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  avatarContainer: {
+    position: "absolute",
+    bottom: 470,
+    right: null,
+    left: "50%",
+    zIndex: 200,
+    borderRadius: 16,
+    width: 120,
+    height: 120,
+    backgroundColor: "#f6f6f6",
+    marginLeft: -60,
+  },
+  registrationContainer: {
     position: "absolute",
     bottom: 0,
-    width: "100%",
-    height: 549,
+    left: 0,
+    right: 0,
     backgroundColor: "#fff",
     alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 25,
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
     padding: 16,
   },
   input: {
-    width: 343,
+    minWidth: 343,
     height: 50,
     borderWidth: 1,
     borderColor: "rgb(232, 232, 232)",
@@ -71,31 +125,52 @@ const styles = StyleSheet.create({
     shadowOffset: {
       width: 0,
       height: 4,
-      marginBottom: 16,
     },
     shadowOpacity: 1,
     shadowRadius: 4,
     backgroundColor: "rgb(246, 246, 246)",
+
+    fontSize: 16,
+    fontFamily: "RobotoRegular",
+    fontWeight: "400",
+    color: "#212121",
+    paddingLeft: 16,
+    marginBottom: 16,
+  },
+  inputFocused: {
+    borderColor: "#FF6C00", // Колір рамки при фокусі
   },
   text: {
-    color: "rgb(33, 33, 33)",
-    // fontFamily: "Roboto",
-    // fontSize: 30,
-    // fontWeight: 500,
-    // lineHeight: 35,
+    fontFamily: "RobotoMedium",
+    fontWeight: "500",
+    fontSize: 30,
+    letterSpacing: 0.01,
+    color: "#212121",
     textAlign: "center",
+    marginTop: 92,
+    marginBottom: 32,
   },
-  button: {
-    width: 343,
-    height: 51,
-    borderRadius: 100,
-    backgroundColor: "rgb(255, 108, 0)",
-    alignItems: "center",
-    justifyContent: "center",
+  loginText: {
+    fontFamily: "RobotoRegular",
+    fontWeight: "400",
+    fontSize: 16,
+    textAlign: "center",
+    color: "#1b4371",
+    marginTop: 16,
+    marginBottom: 29,
   },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
+  showPasswordButton: {
+    position: "absolute",
+    right: 40,
+    top: 333,
+    transform: [{ translateY: -12 }],
+  },
+  showPasswordButtonText: {
+    color: "#1b4371",
+    fontSize: 16,
+    fontFamily: "RobotoRegular",
+    fontWeight: "400",
+    textAlign: "right",
   },
 });
 

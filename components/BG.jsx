@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
   backgroundImage: {
     width: 395,
     height: "100%",
-    resizeMode: "stretch",
+    resizeMode: "cover",
   },
 });
 

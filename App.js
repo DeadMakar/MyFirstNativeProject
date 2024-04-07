@@ -1,26 +1,39 @@
+import React from "react";
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaView, StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import RegistrationScreen from "./Screens/RegistrationScreen";
-import image from "./assets/images/Photo BG.jpg";
-// import { LoginScreen } from "./Screens/LoginScreen";
-// import PostsScreen from "./Screens/PostsScreen.jsx";
+import { useFonts } from "expo-font";
+import LoginScreen from "./Screens/LoginScreen";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 
 export default function App() {
+  const Stack = createStackNavigator();
+
+  const [fontsLoaded] = useFonts({
+    RobotoRegular: require("./assets/fonts/Roboto-Regular.ttf"),
+    RobotoMedium: require("./assets/fonts/Roboto-Medium.ttf"),
+    RobotoBold: require("./assets/fonts/Roboto-Bold.ttf"),
+    SFPRODisplayRegular: require("./assets/fonts/SF-Pro-Display-Regular.otf"),
+    SFPRODisplayLight: require("./assets/fonts/SF-Pro-Display-Light.otf"),
+    InterMedium: require("./assets/fonts/Inter-Medium.otf"),
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
-    <SafeAreaView style={styles.container}>
-      <RegistrationScreen />
-      {/* <LoginScreen /> */}
-      {/* <PostsScreen /> */}
+    <View style={styles.container}>
+      {/* <RegistrationScreen /> */}
+      <LoginScreen />
       <StatusBar style="auto" />
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
   },
 });
