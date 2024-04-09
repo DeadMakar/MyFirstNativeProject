@@ -15,6 +15,7 @@ import {
 import CustomButton from "../components/CustomButton";
 import image from "../assets/images/Photo BG.jpg";
 import { SimpleLineIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 const RegistrationScreen = () => {
   const [userName, setUserName] = useState("");
@@ -25,11 +26,13 @@ const RegistrationScreen = () => {
   const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [hasAvatar, setHasAvatar] = useState(false);
+  const navigation = useNavigation();
 
   const handleSubmit = () => {
     console.log("Username:", userName);
     console.log("Email:", email);
     console.log("Password:", password);
+    navigation.navigate("Home");
   };
 
   const handleAvatarPress = () => {
@@ -38,6 +41,10 @@ const RegistrationScreen = () => {
 
   const handleDismissKeyboard = () => {
     Keyboard.dismiss();
+  };
+
+  const navigateToLogin = () => {
+    navigation.navigate("Login");
   };
 
   return (
@@ -113,7 +120,9 @@ const RegistrationScreen = () => {
               </TouchableOpacity>
 
               <CustomButton title="Зареєструватися" onPress={handleSubmit} />
-              <Text style={styles.loginText}>Вже є акаунт? Увійти</Text>
+              <Text style={styles.loginText} onPress={navigateToLogin}>
+                Вже є акаунт? Увійти
+              </Text>
             </View>
           </KeyboardAvoidingView>
         </ImageBackground>

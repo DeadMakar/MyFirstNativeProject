@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import CustomButton from "../components/CustomButton";
 import image from "../assets/images/Photo BG.jpg";
+import { useNavigation } from "@react-navigation/native";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -21,15 +22,20 @@ const LoginScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const navigation = useNavigation();
 
   const handleSubmit = () => {
     console.log("Email:", email);
     console.log("Password:", password);
-    // Тут ви можете додати логіку для відправки даних на сервер або іншої обробки
+    navigation.navigate("Home");
   };
 
   const handleDismissKeyboard = () => {
     Keyboard.dismiss();
+  };
+
+  const navigateToRegistration = () => {
+    navigation.navigate("Registration");
   };
 
   return (
@@ -73,7 +79,10 @@ const LoginScreen = () => {
                 </Text>
               </TouchableOpacity>
               <CustomButton title="Увійти" onPress={handleSubmit} />
-              <Text style={styles.registerText}>
+              <Text
+                style={styles.registerText}
+                onPress={navigateToRegistration}
+              >
                 Немає акаунту? Зареєструватися
               </Text>
             </View>
