@@ -1,10 +1,11 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 
 const PostsScreen = ({ navigation }) => {
   const handleLogout = () => {
     // Додайте тут логіку для виходу
+    navigation.navigate("Registration");
   };
 
   return (
@@ -12,9 +13,11 @@ const PostsScreen = ({ navigation }) => {
       {/* Хедер */}
       <View style={styles.header}>
         <Text style={styles.headerText}>Публікації</Text>
-        <TouchableOpacity onPress={handleLogout}>
-          <MaterialIcons name="logout" size={24} color="black" />
-        </TouchableOpacity>
+        <View style={styles.iconContainer}>
+          <TouchableOpacity onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={30} color="#BDBDBD" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Вміст екрану */}
@@ -32,16 +35,29 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
+    position: "relative",
+    height: 88,
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingTop: 40,
+    borderBottomWidth: 1,
+    borderBottomColor: "#BDBDBD",
   },
   headerText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    paddingTop: 30,
+    fontFamily: "RobotoMedium",
+    fontWeight: "500",
+    fontSize: 17,
+    lineHeight: 22,
+    letterSpacing: -0.02,
+    textAlign: "center",
+    color: "#212121",
+  },
+  iconContainer: {
+    position: "absolute",
+    right: 16,
+    bottom: 10,
   },
   content: {
     flex: 1,

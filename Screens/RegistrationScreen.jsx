@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import CustomButton from "../components/CustomButton";
 import image from "../assets/images/Photo BG.jpg";
-import { SimpleLineIcons } from "@expo/vector-icons";
+import { Ionicons, SimpleLineIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
 const RegistrationScreen = () => {
@@ -114,9 +114,11 @@ const RegistrationScreen = () => {
                 onPress={() => setShowPassword(!showPassword)}
                 style={styles.showPasswordButton}
               >
-                <Text style={styles.showPasswordButtonText}>
-                  {showPassword ? "Приховати" : "Показати"}
-                </Text>
+                <Ionicons
+                  name={showPassword ? "eye-outline" : "eye-off-outline"}
+                  size={24}
+                  color="#1b4371"
+                />
               </TouchableOpacity>
 
               <CustomButton title="Зареєструватися" onPress={handleSubmit} />
@@ -219,15 +221,8 @@ const styles = StyleSheet.create({
   showPasswordButton: {
     position: "absolute",
     right: 40,
-    bottom: 177,
+    bottom: 175,
     transform: [{ translateY: -12 }],
-  },
-  showPasswordButtonText: {
-    color: "#1b4371",
-    fontSize: 16,
-    fontFamily: "RobotoRegular",
-    fontWeight: "400",
-    textAlign: "right",
   },
 });
 

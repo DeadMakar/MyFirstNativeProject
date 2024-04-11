@@ -1,7 +1,7 @@
 import React from "react";
+import { StyleSheet, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { View, Text, StyleSheet } from "react-native";
-import { SimpleLineIcons, FontAwesome6, Feather } from "@expo/vector-icons";
+import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import PostsScreen from "./PostsScreen";
 import CreatePostsScreen from "./CreatePostsScreen";
 import ProfileScreen from "./ProfileScreen";
@@ -10,14 +10,23 @@ const Tab = createBottomTabNavigator();
 
 const HomeScreen = () => {
   return (
-    <Tab.Navigator>
+    <Tab.Navigator
+      screenOptions={{
+        tabBarStyle: {
+          height: 83,
+          paddingLeft: 50,
+          paddingRight: 50,
+        },
+        tabBarShowLabel: false,
+      }}
+    >
       <Tab.Screen
         name="Публікації"
         component={PostsScreen}
         options={{
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <SimpleLineIcons name="grid" size={size} color={color} />
+          tabBarIcon: () => (
+            <Ionicons name="grid-outline" size={24} color="#212121" />
           ),
         }}
       />
@@ -26,8 +35,19 @@ const HomeScreen = () => {
         component={CreatePostsScreen}
         options={{
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <FontAwesome6 name="plus" size={size} color={color} />
+          tabBarIcon: () => (
+            <View
+              style={{
+                width: 70,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: "#ff6c00",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Ionicons name="add" size={24} color="#FFFFFF" />
+            </View>
           ),
         }}
       />
@@ -36,13 +56,21 @@ const HomeScreen = () => {
         component={ProfileScreen}
         options={{
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Feather name="user" size={size} color={color} />
+          tabBarIcon: () => (
+            <FontAwesome name="user-o" size={24} color="#212121" />
           ),
         }}
       />
     </Tab.Navigator>
   );
 };
+
+const styles = StyleSheet.create({
+  iconContainer: {
+    width: 212,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
 
 export default HomeScreen;
