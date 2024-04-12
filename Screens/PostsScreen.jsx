@@ -25,7 +25,7 @@ const PostsScreen = ({ navigation }) => {
         {/* Здесь відображається вміст екрану */}
       </View>
 
-      <Text style={styles.startText}>CreatePostsScreen</Text>
+      <Text style={styles.startText}>PostsScreen</Text>
     </View>
   );
 };

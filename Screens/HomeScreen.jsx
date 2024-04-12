@@ -13,7 +13,7 @@ const HomeScreen = () => {
     <Tab.Navigator
       screenOptions={{
         tabBarStyle: {
-          height: 83,
+          height: 60,
           paddingLeft: 50,
           paddingRight: 50,
         },
