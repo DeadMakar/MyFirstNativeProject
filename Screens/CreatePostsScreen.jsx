@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   },
   cameraContainer: {
     position: "relative",
-    height: 240,
+    height: 340,
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
