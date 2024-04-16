@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -9,8 +9,13 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Camera } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
+import * as Location from "expo-location";
 
 const CreatePostsScreen = ({ navigation }) => {
+  const [photoName, setPhotoName] = useState("");
+  const [locality, setLocality] = useState("");
+  const [photoUri, setPhotoUri] = useState(null);
+
   const cameraRef = useRef(null);
 
   useLayoutEffect(() => {
@@ -24,12 +29,20 @@ const CreatePostsScreen = ({ navigation }) => {
   const takePicture = async () => {
     if (cameraRef.current) {
       try {
-        const { uri } = await cameraRef.current.takePictureAsync();
-        console.log("Picture taken:", uri);
+        // Запит дозволу на використання служб місцезнаходження
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          // Якщо дозвіл не надано, обробити цю ситуацію відповідним чином
+          console.log("Permission to access location was denied");
+          return;
+        }
 
-        const asset = await MediaLibrary.saveToLibraryAsync(uri);
+        // Визначення місцезнаходження
+        const location = await Location.getCurrentPositionAsync({});
+        const { latitude, longitude } = location.coords;
+        console.log("Location:", latitude, longitude);
 
-        console.log("Image saved to:", asset);
+        // Додатковий код
       } catch (error) {
         console.error("Error taking picture:", error);
       }
@@ -55,24 +68,23 @@ const CreatePostsScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Створити публікацію</Text>
-        <View style={styles.iconContainer}>
-          <TouchableOpacity onPress={handleGoBack}>
-            <Ionicons name="arrow-back" size={30} color="#BDBDBD" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      <View style={styles.header}>{/* ... */}</View>
 
       {/* Вміст екрану */}
       <View style={styles.content}>
         {/* Контейнер для камери */}
         <View style={[styles.cameraContainer, { position: "relative" }]}>
-          <Camera
-            style={styles.cameraPreview}
-            type={Camera.Constants.Type.back}
-            ref={cameraRef}
-          />
+          {photoUri ? (
+            // Відображення фото, якщо воно є
+            <Image source={{ uri: photoUri }} style={styles.cameraPreview} />
+          ) : (
+            // Відображення камери
+            <Camera
+              style={styles.cameraPreview}
+              type={Camera.Constants.Type.back}
+              ref={cameraRef}
+            />
+          )}
           <View style={styles.cameraIconOuterContainer}>
             <TouchableOpacity onPress={takePicture}>
               <View style={styles.cameraIconContainer}>
@@ -91,6 +103,8 @@ const CreatePostsScreen = ({ navigation }) => {
               placeholder="Назва..."
               style={styles.inputText}
               placeholderTextColor="#BDBDBD"
+              value={photoName}
+              onChangeText={setPhotoName}
             />
           </View>
 
@@ -105,6 +119,8 @@ const CreatePostsScreen = ({ navigation }) => {
               placeholder="Місцевість..."
               style={styles.inputText}
               placeholderTextColor="#BDBDBD"
+              value={locality}
+              onChangeText={setLocality}
             />
           </View>
         </View>
