@@ -1,48 +1,74 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   TextInput,
+  Image,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { Camera } from "expo-camera";
+import * as ImagePicker from "expo-image-picker";
 import * as MediaLibrary from "expo-media-library";
 import * as Location from "expo-location";
+import { useNavigation } from "@react-navigation/native";
 
-const CreatePostsScreen = ({ navigation }) => {
-  const [photoName, setPhotoName] = useState("");
-  const [locality, setLocality] = useState("");
-  const [photoUri, setPhotoUri] = useState(null);
-
+const CreatePostsScreen = () => {
+  const [showCamera, setShowCamera] = useState(false);
+  const [capturedImage, setCapturedImage] = useState(null);
+  const [locationName, setLocationName] = useState("");
   const cameraRef = useRef(null);
-
-  useLayoutEffect(() => {
-    navigation.setOptions({ tabBarVisible: false });
-  }, [navigation]);
+  const navigation = useNavigation();
+  const [currentLocation, setCurrentLocation] = useState(null);
 
   const handleGoBack = () => {
     navigation.goBack();
   };
 
+  const publishPost = async () => {
+    try {
+      // Отримуємо дозвіл на доступ до геолокації
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        return;
+      }
+
+      // Отримуємо поточні координати користувача
+      const location = await Location.getCurrentPositionAsync({});
+      setCurrentLocation(location.coords); // Зберігаємо координати в стані
+
+      // Перенаправляємо користувача на екран PostsScreen
+      navigation.navigate("PostsScreen");
+    } catch (error) {
+      console.error("Error getting location:", error);
+    }
+  };
+
   const takePicture = async () => {
     if (cameraRef.current) {
       try {
-        // Запит дозволу на використання служб місцезнаходження
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          // Якщо дозвіл не надано, обробити цю ситуацію відповідним чином
-          console.log("Permission to access location was denied");
-          return;
+        const { uri } = await cameraRef.current.takePictureAsync();
+        console.log("Picture taken:", uri);
+
+        const asset = await MediaLibrary.saveToLibraryAsync(uri);
+
+        console.log("Image saved to:", asset);
+        setCapturedImage(uri);
+        setShowCamera(false);
+
+        // Встановлюємо назву місцевості за отриманими координатами
+        if (currentLocation) {
+          const location = await Location.reverseGeocodeAsync({
+            latitude: currentLocation.latitude,
+            longitude: currentLocation.longitude,
+          });
+          if (location && location.length > 0) {
+            const { name } = location[0];
+            setLocationName(name);
+          }
         }
-
-        // Визначення місцезнаходження
-        const location = await Location.getCurrentPositionAsync({});
-        const { latitude, longitude } = location.coords;
-        console.log("Location:", latitude, longitude);
-
-        // Додатковий код
       } catch (error) {
         console.error("Error taking picture:", error);
       }
@@ -51,12 +77,14 @@ const CreatePostsScreen = ({ navigation }) => {
 
   const openGallery = async () => {
     try {
-      const permission = await MediaLibrary.requestPermissionsAsync();
+      const permission =
+        await ImagePicker.requestMediaLibraryPermissionsAsync(); // Запит дозволу на доступ до галереї
       if (permission.granted) {
-        const result = await MediaLibrary.getAssetsAsync({
-          mediaType: "photo",
-        });
-        console.log("Gallery opened:", result);
+        const result = await ImagePicker.launchImageLibraryAsync(); // Відкриття галереї для вибору фотографії
+        if (!result.cancelled) {
+          setCapturedImage(result.uri); // Зберігання шляху до обраної фотографії
+          setShowCamera(false); // Ховаємо камеру (якщо вона показана)
+        }
       } else {
         console.log("Permission denied to access media library");
       }
@@ -65,34 +93,63 @@ const CreatePostsScreen = ({ navigation }) => {
     }
   };
 
+  const clearFields = () => {
+    setCapturedImage(null); // Очищуємо фото
+    setLocationName(""); // Очищуємо назву місцевості
+    // Якщо є інші поля, які потрібно очистити, додайте їх сюди
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>{/* ... */}</View>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Створити публікацію</Text>
+        <View style={styles.iconContainer}>
+          <TouchableOpacity onPress={handleGoBack}>
+            <Ionicons name="arrow-back" size={30} color="#BDBDBD" />
+          </TouchableOpacity>
+        </View>
+      </View>
 
-      {/* Вміст екрану */}
       <View style={styles.content}>
-        {/* Контейнер для камери */}
-        <View style={[styles.cameraContainer, { position: "relative" }]}>
-          {photoUri ? (
-            // Відображення фото, якщо воно є
-            <Image source={{ uri: photoUri }} style={styles.cameraPreview} />
-          ) : (
-            // Відображення камери
+        {showCamera ? (
+          // Контейнер для камери
+          <TouchableOpacity
+            style={[styles.cameraContainer, { position: "relative" }]}
+            onPress={() => setShowCamera(false)} // При натисканні на контейнер, камера ховається
+          >
             <Camera
               style={styles.cameraPreview}
               type={Camera.Constants.Type.back}
               ref={cameraRef}
             />
-          )}
-          <View style={styles.cameraIconOuterContainer}>
-            <TouchableOpacity onPress={takePicture}>
+            <View style={styles.cameraIconOuterContainer}>
+              <TouchableOpacity onPress={takePicture}>
+                <View style={styles.cameraIconContainer}>
+                  <Ionicons name="camera" size={24} color="#BDBDBD" />
+                </View>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        ) : (
+          // Відображення зробленого знімка або порожнього контейнера для камери
+          <TouchableOpacity
+            style={[styles.cameraContainer, { position: "relative" }]}
+            onPress={() => setShowCamera(true)} // При натисканні на контейнер, камера вмикається
+          >
+            {capturedImage ? (
+              <Image
+                source={{ uri: capturedImage }}
+                style={styles.cameraPreview}
+              />
+            ) : (
               <View style={styles.cameraIconContainer}>
                 <Ionicons name="camera" size={24} color="#BDBDBD" />
               </View>
-            </TouchableOpacity>
-          </View>
-        </View>
+            )}
+          </TouchableOpacity>
+        )}
+
         <TouchableOpacity onPress={openGallery}>
           <Text style={styles.cameraText}>Завантажте фото</Text>
         </TouchableOpacity>
@@ -103,8 +160,6 @@ const CreatePostsScreen = ({ navigation }) => {
               placeholder="Назва..."
               style={styles.inputText}
               placeholderTextColor="#BDBDBD"
-              value={photoName}
-              onChangeText={setPhotoName}
             />
           </View>
 
@@ -116,17 +171,40 @@ const CreatePostsScreen = ({ navigation }) => {
               style={styles.inputIcon}
             />
             <TextInput
-              placeholder="Місцевість..."
+              placeholder={`Місцевість... ${locationName}`}
               style={styles.inputText}
               placeholderTextColor="#BDBDBD"
-              value={locality}
-              onChangeText={setLocality}
             />
           </View>
         </View>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity style={styles.button} onPress={publishPost}>
             <Text style={styles.buttonText}>Опубліковати</Text>
+          </TouchableOpacity>
+        </View>
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: 24,
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              width: 70,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: "#f6f6f6",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <AntDesign
+              name="delete"
+              size={24}
+              color="#BDBDBD"
+              onPress={clearFields}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -137,6 +215,7 @@ const CreatePostsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#FFFFFF",
   },
   header: {
     position: "relative",
@@ -175,7 +254,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 16,
-    backgroundColor: "#E8E8E8",
+    backgroundColor: "#F6F6F6",
     borderWidth: 1,
     borderColor: "#e8e8e8",
     borderRadius: 8,

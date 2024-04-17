@@ -5,8 +5,10 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import RegistrationScreen from "./Screens/RegistrationScreen";
 import LoginScreen from "./Screens/LoginScreen";
-import HomeScreen from "./Screens/HomeScreen"; // Імпортуємо HomeScreen
+import HomeScreen from "./Screens/HomeScreen";
+import PostsScreen from "./Screens/PostsScreen";
 import { useFonts } from "expo-font";
+import CreatePostsScreen from "./Screens/CreatePostsScreen";
 
 const Stack = createStackNavigator();
 
@@ -40,6 +42,16 @@ export default function App() {
         <Stack.Screen
           name="Home"
           component={HomeScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="PostsScreen"
+          component={PostsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CreatePostsScreen"
+          component={CreatePostsScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
