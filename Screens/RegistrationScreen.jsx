@@ -11,11 +11,14 @@ import {
   ImageBackground,
   TouchableWithoutFeedback,
   Keyboard,
+  Image,
 } from "react-native";
 import CustomButton from "../components/CustomButton";
 import image from "../assets/images/Photo BG.jpg";
 import { Ionicons, SimpleLineIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import * as ImagePicker from "expo-image-picker";
+import { FileSystem } from "expo";
 
 const RegistrationScreen = () => {
   const [userName, setUserName] = useState("");
@@ -27,6 +30,7 @@ const RegistrationScreen = () => {
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [hasAvatar, setHasAvatar] = useState(false);
   const navigation = useNavigation();
+  const [avatarUri, setAvatarUri] = useState(null);
 
   const handleSubmit = () => {
     console.log("Username:", userName);
@@ -35,8 +39,34 @@ const RegistrationScreen = () => {
     navigation.navigate("Home");
   };
 
-  const handleAvatarPress = () => {
-    setHasAvatar(!hasAvatar);
+  const handleAvatarDelete = () => {
+    setAvatarUri(null);
+    setHasAvatar(false);
+  };
+
+  const handleAvatarPress = async () => {
+    try {
+      const permission =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (permission.granted) {
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 1,
+        });
+        console.log("ImagePicker result:", result);
+        if (!result.cancelled) {
+          setAvatarUri(result.assets[0].uri); // Оновлення значення avatarUri
+          setHasAvatar(true);
+          console.log("Avatar URI:", result.assets[0].uri);
+        }
+      } else {
+        console.log("Permission denied to access media library");
+      }
+    } catch (error) {
+      console.error("Error selecting image:", error);
+    }
   };
 
   const handleDismissKeyboard = () => {
@@ -57,16 +87,20 @@ const RegistrationScreen = () => {
             keyboardVerticalOffset={-150}
           >
             <View style={styles.avatarContainer}>
-              {hasAvatar ? (
-                <View style={styles.iconContainer}>
+              {hasAvatar && (
+                <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
+              )}
+              {hasAvatar && (
+                <View style={styles.icon}>
                   <SimpleLineIcons
                     name="close"
                     size={25}
                     color="#BDBDBD"
-                    onPress={handleAvatarPress}
+                    onPress={handleAvatarDelete}
                   />
                 </View>
-              ) : (
+              )}
+              {!hasAvatar && (
                 <View style={styles.icon}>
                   <SimpleLineIcons
                     name="plus"
@@ -152,6 +186,13 @@ const styles = StyleSheet.create({
     height: 120,
     backgroundColor: "#f6f6f6",
     marginLeft: -60,
+    justifyContent: "center",
+  },
+  avatarImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 16,
+    opacity: 1,
   },
   icon: {
     position: "absolute",
