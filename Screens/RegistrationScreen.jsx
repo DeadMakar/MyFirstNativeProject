@@ -18,7 +18,6 @@ import image from "../assets/images/Photo BG.jpg";
 import { Ionicons, SimpleLineIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
-import { FileSystem } from "expo";
 
 const RegistrationScreen = () => {
   const [userName, setUserName] = useState("");
@@ -57,7 +56,7 @@ const RegistrationScreen = () => {
         });
         console.log("ImagePicker result:", result);
         if (!result.cancelled) {
-          setAvatarUri(result.assets[0].uri); // Оновлення значення avatarUri
+          setAvatarUri(result.assets[0].uri);
           setHasAvatar(true);
           console.log("Avatar URI:", result.assets[0].uri);
         }
@@ -112,12 +111,12 @@ const RegistrationScreen = () => {
               )}
             </View>
             <View style={styles.registrationContainer}>
-              <Text style={styles.text}>Реєстрація</Text>
+              <Text style={styles.text}>Registration</Text>
               <TextInput
                 style={[styles.input, isUsernameFocused && styles.inputFocused]}
                 onChangeText={setUserName}
                 value={userName}
-                placeholder="Логін"
+                placeholder="Login"
                 placeholderTextColor="#bdbdbd"
                 keyboardType="default"
                 onFocus={() => setIsUsernameFocused(true)}
@@ -127,7 +126,7 @@ const RegistrationScreen = () => {
                 style={[styles.input, isEmailFocused && styles.inputFocused]}
                 onChangeText={setEmail}
                 value={email}
-                placeholder="Адреса електронної пошти"
+                placeholder="Email address"
                 placeholderTextColor="#bdbdbd"
                 keyboardType="email-address"
                 onFocus={() => setIsEmailFocused(true)}
@@ -137,7 +136,7 @@ const RegistrationScreen = () => {
                 style={[styles.input, isPasswordFocused && styles.inputFocused]}
                 onChangeText={setPassword}
                 value={password}
-                placeholder="Пароль"
+                placeholder="Password"
                 placeholderTextColor="#bdbdbd"
                 keyboardType="default"
                 secureTextEntry={!showPassword}
@@ -155,9 +154,9 @@ const RegistrationScreen = () => {
                 />
               </TouchableOpacity>
 
-              <CustomButton title="Зареєструватися" onPress={handleSubmit} />
+              <CustomButton title="Sign up" onPress={handleSubmit} />
               <Text style={styles.loginText} onPress={navigateToLogin}>
-                Вже є акаунт? Увійти
+                Already have an account? Sign in
               </Text>
             </View>
           </KeyboardAvoidingView>

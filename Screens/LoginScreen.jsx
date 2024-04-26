@@ -49,12 +49,12 @@ const LoginScreen = () => {
             keyboardVerticalOffset={-200}
           >
             <View style={styles.loginContainer}>
-              <Text style={styles.text}>Увійти</Text>
+              <Text style={styles.text}>Sign in</Text>
               <TextInput
                 style={[styles.input, isEmailFocused && styles.inputFocused]}
                 onChangeText={setEmail}
                 value={email}
-                placeholder="Адреса електронної пошти"
+                placeholder="Email address"
                 placeholderTextColor="#bdbdbd"
                 keyboardType="email-address"
                 onFocus={() => setIsEmailFocused(true)}
@@ -64,7 +64,7 @@ const LoginScreen = () => {
                 style={[styles.input, isPasswordFocused && styles.inputFocused]}
                 onChangeText={setPassword}
                 value={password}
-                placeholder="Пароль"
+                placeholder="Password"
                 placeholderTextColor="#bdbdbd"
                 keyboardType="default"
                 secureTextEntry={!showPassword}
@@ -82,12 +82,12 @@ const LoginScreen = () => {
                 />
               </TouchableOpacity>
 
-              <CustomButton title="Увійти" onPress={handleSubmit} />
+              <CustomButton title="Sign in" onPress={handleSubmit} />
               <Text
                 style={styles.registerText}
                 onPress={navigateToRegistration}
               >
-                Немає акаунту? Зареєструватися
+                Don't have an account? Sign up
               </Text>
             </View>
           </KeyboardAvoidingView>

@@ -18,6 +18,7 @@ const CreatePostsScreen = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
   const [locationName, setLocationName] = useState("");
+  const [isPhotoAdded, setIsPhotoAdded] = useState(false); // Доданий новий стан для відстеження наявності фотографії
   const cameraRef = useRef(null);
   const navigation = useNavigation();
   const [currentLocation, setCurrentLocation] = useState(null);
@@ -28,18 +29,15 @@ const CreatePostsScreen = () => {
 
   const publishPost = async () => {
     try {
-      // Отримуємо дозвіл на доступ до геолокації
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         console.log("Permission to access location was denied");
         return;
       }
 
-      // Отримуємо поточні координати користувача
       const location = await Location.getCurrentPositionAsync({});
-      setCurrentLocation(location.coords); // Зберігаємо координати в стані
+      setCurrentLocation(location.coords);
 
-      // Перенаправляємо користувача на екран PostsScreen
       navigation.navigate("PostsScreen");
     } catch (error) {
       console.error("Error getting location:", error);
@@ -47,43 +45,60 @@ const CreatePostsScreen = () => {
   };
 
   const takePicture = async () => {
-    if (cameraRef.current) {
+    if (cameraRef.current && showCamera) {
       try {
-        const { uri } = await cameraRef.current.takePictureAsync();
-        console.log("Picture taken:", uri);
+        const { status } = await Camera.requestCameraPermissionsAsync();
+        if (status === "granted") {
+          const { uri } = await cameraRef.current.takePictureAsync();
+          console.log("Picture taken:", uri);
 
-        const asset = await MediaLibrary.saveToLibraryAsync(uri);
-
-        console.log("Image saved to:", asset);
-        setCapturedImage(uri);
-        setShowCamera(false);
-
-        // Встановлюємо назву місцевості за отриманими координатами
-        if (currentLocation) {
-          const location = await Location.reverseGeocodeAsync({
-            latitude: currentLocation.latitude,
-            longitude: currentLocation.longitude,
-          });
-          if (location && location.length > 0) {
-            const { name } = location[0];
-            setLocationName(name);
+          const asset = await MediaLibrary.saveToLibraryAsync(uri);
+          if (asset) {
+            console.log("Image saved to:", asset);
+          } else {
+            console.log("Failed to save image to library");
           }
+
+          setCapturedImage(uri);
+          setShowCamera(false);
+          setIsPhotoAdded(true); // Встановлення стану, що фотографія була додана
+
+          if (currentLocation) {
+            const location = await Location.reverseGeocodeAsync({
+              latitude: currentLocation.latitude,
+              longitude: currentLocation.longitude,
+            });
+            if (location && location.length > 0) {
+              const { name } = location[0];
+              setLocationName(name);
+            }
+          }
+        } else {
+          console.log("Permission not granted for camera");
         }
       } catch (error) {
         console.error("Error taking picture:", error);
       }
+    } else {
+      console.log("Camera is not running");
     }
   };
 
   const openGallery = async () => {
     try {
       const permission =
-        await ImagePicker.requestMediaLibraryPermissionsAsync(); // Запит дозволу на доступ до галереї
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (permission.granted) {
-        const result = await ImagePicker.launchImageLibraryAsync(); // Відкриття галереї для вибору фотографії
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 1,
+        });
         if (!result.cancelled) {
-          setCapturedImage(result.uri); // Зберігання шляху до обраної фотографії
-          setShowCamera(false); // Ховаємо камеру (якщо вона показана)
+          setCapturedImage(result.assets[0].uri);
+          setShowCamera(false);
+          setIsPhotoAdded(true); // Встановлення стану, що фотографія була додана
         }
       } else {
         console.log("Permission denied to access media library");
@@ -94,16 +109,16 @@ const CreatePostsScreen = () => {
   };
 
   const clearFields = () => {
-    setCapturedImage(null); // Очищуємо фото
-    setLocationName(""); // Очищуємо назву місцевості
-    // Якщо є інші поля, які потрібно очистити, додайте їх сюди
+    setCapturedImage(null);
+    setLocationName("");
+    setIsPhotoAdded(false); // Очищення стану після очищення полів
   };
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>Створити публікацію</Text>
+        <Text style={styles.headerText}>Create a post</Text>
         <View style={styles.iconContainer}>
           <TouchableOpacity onPress={handleGoBack}>
             <Ionicons name="arrow-back" size={30} color="#BDBDBD" />
@@ -113,10 +128,9 @@ const CreatePostsScreen = () => {
 
       <View style={styles.content}>
         {showCamera ? (
-          // Контейнер для камери
           <TouchableOpacity
             style={[styles.cameraContainer, { position: "relative" }]}
-            onPress={() => setShowCamera(false)} // При натисканні на контейнер, камера ховається
+            onPress={() => setShowCamera(false)}
           >
             <Camera
               style={styles.cameraPreview}
@@ -132,10 +146,9 @@ const CreatePostsScreen = () => {
             </View>
           </TouchableOpacity>
         ) : (
-          // Відображення зробленого знімка або порожнього контейнера для камери
           <TouchableOpacity
             style={[styles.cameraContainer, { position: "relative" }]}
-            onPress={() => setShowCamera(true)} // При натисканні на контейнер, камера вмикається
+            onPress={() => setShowCamera(true)}
           >
             {capturedImage ? (
               <Image
@@ -151,13 +164,15 @@ const CreatePostsScreen = () => {
         )}
 
         <TouchableOpacity onPress={openGallery}>
-          <Text style={styles.cameraText}>Завантажте фото</Text>
+          <Text style={styles.cameraText}>
+            {capturedImage ? "Edit Photo" : "Upload Photo"}
+          </Text>
         </TouchableOpacity>
 
         <View style={styles.inputContainer}>
           <View style={styles.input}>
             <TextInput
-              placeholder="Назва..."
+              placeholder="Name..."
               style={styles.inputText}
               placeholderTextColor="#BDBDBD"
             />
@@ -171,42 +186,32 @@ const CreatePostsScreen = () => {
               style={styles.inputIcon}
             />
             <TextInput
-              placeholder={`Місцевість... ${locationName}`}
+              placeholder={`Locality... ${locationName}`}
               style={styles.inputText}
               placeholderTextColor="#BDBDBD"
             />
           </View>
         </View>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={publishPost}>
-            <Text style={styles.buttonText}>Опубліковати</Text>
-          </TouchableOpacity>
-        </View>
-        <View
-          style={{
-            justifyContent: "center",
-            alignItems: "center",
-            marginTop: 24,
-          }}
-        >
-          <TouchableOpacity
-            style={{
-              width: 70,
-              height: 40,
-              borderRadius: 20,
-              backgroundColor: "#f6f6f6",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <AntDesign
-              name="delete"
-              size={24}
-              color="#BDBDBD"
+
+        {/* Відображення кнопок залежно від наявності фотографії */}
+        {isPhotoAdded && (
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.button, styles.activeButton]}
+              onPress={publishPost}
+            >
+              <Text style={[styles.buttonText, styles.activeButtonText]}>
+                Publish
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.buttonDel, styles.activeButton]}
               onPress={clearFields}
-            />
-          </TouchableOpacity>
-        </View>
+            >
+              <AntDesign name="delete" size={20} color="#FFF" />
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -326,6 +331,7 @@ const styles = StyleSheet.create({
     height: 51,
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 16,
   },
   buttonText: {
     fontFamily: "RobotoMedium",
@@ -333,6 +339,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     color: "#BDBDBD",
+  },
+  activeButton: {
+    backgroundColor: "rgb(255, 108, 0)",
+  },
+  activeButtonText: {
+    color: "#fff",
+  },
+  buttonDel: {
+    width: 70,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#f6f6f6",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

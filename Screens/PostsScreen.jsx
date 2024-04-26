@@ -12,7 +12,7 @@ const PostsScreen = ({ navigation }) => {
     <View style={styles.container}>
       {/* Хедер */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>Публікації</Text>
+        <Text style={styles.headerText}>Posts</Text>
         <View style={styles.iconContainer}>
           <TouchableOpacity onPress={handleLogout}>
             <Ionicons name="log-out-outline" size={30} color="#BDBDBD" />
